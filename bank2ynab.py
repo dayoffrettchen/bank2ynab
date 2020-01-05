@@ -445,6 +445,7 @@ class B2YBank(object):
                                    self._is_py2,
                                    delimiter=delim) as transaction_reader:
             # make each row of our new transaction file
+            logging.info("footer_rows {}".format(row_count))
             for row in transaction_reader:
                 line = transaction_reader.line_num
                 # skip header & footer rows
@@ -459,6 +460,8 @@ class B2YBank(object):
                     # create our output_row
                     fixed_row = self._fix_row(row)
                     # convert negative inflows to standard outflows
+                    
+                    
                     fixed_row = self._fix_outflow(fixed_row)
                     # fill in blank memo fields
                     fixed_row = self._auto_memo(fixed_row, fill_memo)
@@ -467,6 +470,7 @@ class B2YBank(object):
                     # check our row isn't a null transaction
                     if self._valid_row(fixed_row) is True:
                         output_data.append(fixed_row)
+                    
         # add in column headers
         logging.info("Parsed {} lines".format(len(output_data)))
         output_data.insert(0, output_columns)
@@ -497,7 +501,20 @@ class B2YBank(object):
             # fetch data from those input columns if they are not empty,
             # and merge them
             cell_parts = []
+            listing = list(indices)
+            if len(listing)>0:
+                i = listing[0]
+                
+                try:
+                    print("ntaen")
+                    print(row[listing[0]])
+                    if row[listing[0]].lstrip():
+                        print("tertra")
+                        cell_parts.append(row[listing[0]].lstrip())
+                except IndexError:
+                    pass
             for i in indices:
+                print("dutrianetuaie")
                 try:
                     if row[i].lstrip():
                         cell_parts.append(row[i].lstrip())
@@ -818,6 +835,7 @@ class YNAB_API(object):  # in progress (2)
                    self.budget_id,
                    self.api_token))
 
+        print(data)
         post_response = requests.post(url, json=data)
 
         # response handling - TODO: make this more thorough!
@@ -903,7 +921,7 @@ class YNAB_API(object):  # in progress (2)
         name = details["name"]
         detail = errors[id]
         logging.error("{} - {} ({})".format(id, detail, name))
-
+        logging.info(details)
         return ["ERROR", id, detail]
 
     def select_account(self, bank):
